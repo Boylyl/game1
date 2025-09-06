@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kemal's Journey to Find dd Iyang</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffd6e7, #e2f0ff);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating hearts */
+        .floating-heart {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0.7;
+            animation: float 8s infinite ease-in-out;
+            z-index: 0;
+            color: #ff6b9d;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0) rotate(0); }
+            25% { transform: translateY(-20px) translateX(10px) rotate(10deg); }
+            50% { transform: translateY(10px) translateX(-15px) rotate(-10deg); }
+            75% { transform: translateY(-15px) translateX(-10px) rotate(5deg); }
+        }
+
+        .header {
+            text-align: center;
+            margin: 20px 0 30px;
+            z-index: 10;
+            max-width: 600px;
+        }
+
+        .header h1 {
+            color: #ff6b9d;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            color: #8a4c7d;
+            font-size: 1.2rem;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        .game-container {
+            position: relative;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(138, 76, 125, 0.2);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .character-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .character {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .character-emoji {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .character-name {
+            font-weight: bold;
+            color: #ff6b9d;
+            font-size: 1.2rem;
+        }
+
+        .maze-container {
+            position: relative;
+            background: #fff9fb;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+            aspect-ratio: 1/1;
+        }
+
+        .maze-grid {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            grid-template-rows: repeat(15, 1fr);
+            height: 100%;
+            width: 100%;
+        }
+
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 182, 193, 0.3);
+        }
+
+        .wall {
+            background: #ffb6c1;
+        }
+
+        .path {
+            background: #fff0f5;
+        }
+
+        .start {
+            background: #d4f0fd;
+        }
+
+        .end {
+            background: #ffcce0;
+        }
+
+        .player {
+            font-size: 24px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .end-point {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .end-point::after {
+            content: "🧒";
+            font-size: 28px;
+            position: absolute;
+            animation: bounce 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .direction-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .control-btn {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(to bottom, #ff9dbb, #ff6b9d);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(255, 107, 157, 0.4);
+        }
+
+        .message-container {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 20;
+            max-width: 500px;
+        }
+
+        .message-container h2 {
+            color: #ff6b9d;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .message-container p {
+            color: #8a4c7d;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .surprise-photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #ffd1dc;
+            margin: 0 auto 20px;
+            display: block;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .music-control {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            border: none;
+            font-size: 20px;
+            color: #ff6b9d;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #8a4c7d;
+            font-size: 1.1rem;
+            font-weight: 500;
+            z-index: 10;
+            max-width: 600px;
+            padding: 0 20px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .control-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+            
+            .game-container {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .control-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
+            .character-emoji {
+                font-size: 30px;
+            }
+            
+            .character-name {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating hearts decoration -->
+    <div class="floating-heart" style="top: 10%; left: 15%;">💖</div>
+    <div class="floating-heart" style="top: 20%; right: 10%; animation-delay: -2s;">💕</div>
+    <div class="floating-heart" style="top: 40%; left: 5%; animation-delay: -4s;">💗</div>
+    <div class="floating-heart" style="top: 70%; right: 15%; animation-delay: -1s;">💞</div>
+    <div class="floating-heart" style="top: 85%; left: 20%; animation-delay: -3s;">💓</div>
+
+    <div class="header">
+        <h1>Kemal's Journey to Find Iyang 💖</h1>
+        <p>Guide Kemal through the heart-shaped maze to find Iyang!</p>
+    </div>
+
+    <div class="game-container">
+        <div class="character-info">
+            <div class="character">
+                <div class="character-emoji">👦</div>
+                <div class="character-name">Kemal</div>
+            </div>
+            <div class="character">
+                <div class="character-emoji">🧒</div>
+                <div class="character-name">Iyang</div>
+            </div>
+        </div>
+        
+        <div class="maze-container">
+            <div class="maze-grid" id="maze"></div>
+        </div>
+        
+        <div class="controls">
+            <div class="direction-row">
+                <button class="control-btn" id="up">⬆️</button>
+            </div>
+            <div class="direction-row">
+                <button class="control-btn" id="left">⬅️</button>
+                <button class="control-btn" id="down">⬇️</button>
+                <button class="control-btn" id="right">➡️</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="message-container" id="message">
+        <h2>Kaka nemuin dedee! 💕</h2>
+        <img src="haruaa.jpg" alt="Surprise!" class="surprise-photo">
+        <p>dd uda lama nunggu disini hngg 🥹</p>
+        <p>No matter how complex life's maze becomes,</p>
+        <p>I'll always be here at the end of your path.</p>
+        <button class="control-btn" id="restart" style="margin-top: 20px;">🔁 Play Again</button>
+    </div>
+
+    <button class="music-control" id="musicBtn">🎵</button>
+    
+    <div class="footer">
+        <p>This game is only for KAKA KEMALL! </p>
+    </div>
+
+    <audio id="bgMusic" loop>
+        <source src="Glue.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Maze configuration
+            const mazeSize = 15;
+            let playerPos = {row: 1, col: 7};
+            let gameWon = false;
+            let musicPlaying = false;
+            
+            // Heart-shaped maze layout
+            const mazeLayout = [
+                [1,1,1,1,1,0,0,0,0,0,1,1,1,1,1],
+                [1,1,1,0,0,0,0,0,0,0,0,0,1,1,1],
+                [1,1,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+                [1,1,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                [1,1,1,0,0,0,0,0,0,0,0,0,1,1,1],
+                [1,1,1,1,0,0,0,0,0,0,0,1,1,1,1],
+                [1,1,1,1,1,0,0,0,0,0,1,1,1,1,1],
+                [1,1,1,1,1,1,0,0,0,1,1,1,1,1,1]
+            ];
+            
+            // Create the maze
+            const maze = document.getElementById('maze');
+            
+            function createMaze() {
+                maze.innerHTML = '';
+                for (let row = 0; row < mazeSize; row++) {
+                    for (let col = 0; col < mazeSize; col++) {
+                        const cell = document.createElement('div');
+                        cell.classList.add('cell');
+                        
+                        if (mazeLayout[row][col] === 1) {
+                            cell.classList.add('wall');
+                        } else {
+                            cell.classList.add('path');
+                            
+                            // Start position
+                            if (row === playerPos.row && col === playerPos.col) {
+                                const player = document.createElement('div');
+                                player.classList.add('player');
+                                player.textContent = '👦'; // Kemal's character
+                                cell.appendChild(player);
+                            }
+                            
+                            // End position (heart shape bottom)
+                            if (row === 14 && col === 7) {
+                                cell.classList.add('end');
+                                const endPoint = document.createElement('div');
+                                endPoint.classList.add('end-point');
+                                cell.appendChild(endPoint);
+                            }
+                        }
+                        
+                        maze.appendChild(cell);
+                    }
+                }
+            }
+            
+            // Move player function
+            function movePlayer(direction) {
+                if (gameWon) return;
+                
+                let newRow = playerPos.row;
+                let newCol = playerPos.col;
+                
+                switch (direction) {
+                    case 'up': newRow--; break;
+                    case 'down': newRow++; break;
+                    case 'left': newCol--; break;
+                    case 'right': newCol++; break;
+                }
+                
+                // Check if move is valid
+                if (newRow >= 0 && newRow < mazeSize && 
+                    newCol >= 0 && newCol < mazeSize &&
+                    mazeLayout[newRow][newCol] === 0) {
+                    
+                    playerPos = {row: newRow, col: newCol};
+                    createMaze();
+                    
+                    // Check if player reached the end
+                    if (playerPos.row === 14 && playerPos.col === 7) {
+                        gameWon = true;
+                        setTimeout(() => {
+                            document.getElementById('message').style.display = 'block';
+                        }, 500);
+                    }
+                }
+            }
+            
+            // Initialize the game
+            createMaze();
+            
+            // Keyboard controls
+            document.addEventListener('keydown', (e) => {
+                switch (e.key) {
+                    case 'ArrowUp':
+                    case 'w':
+                    case 'W': movePlayer('up'); break;
+                    case 'ArrowDown':
+                    case 's':
+                    case 'S': movePlayer('down'); break;
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A': movePlayer('left'); break;
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D': movePlayer('right'); break;
+                }
+            });
+            
+            // Button controls
+            document.getElementById('up').addEventListener('click', () => movePlayer('up'));
+            document.getElementById('down').addEventListener('click', () => movePlayer('down'));
+            document.getElementById('left').addEventListener('click', () => movePlayer('left'));
+            document.getElementById('right').addEventListener('click', () => movePlayer('right'));
+            
+            // Restart button
+            document.getElementById('restart').addEventListener('click', () => {
+                playerPos = {row: 1, col: 7};
+                gameWon = false;
+                createMaze();
+                document.getElementById('message').style.display = 'none';
+            });
+            
+            // Music control
+            const music = document.getElementById('bgMusic');
+            const musicBtn = document.getElementById('musicBtn');
+            
+            musicBtn.addEventListener('click', () => {
+                if (musicPlaying) {
+                    music.pause();
+                    musicBtn.textContent = '🔇';
+                } else {
+                    music.play();
+                    musicBtn.textContent = '🎵';
+                }
+                musicPlaying = !musicPlaying;
+            });
+            
+            // Add touch support for mobile swiping
+            let touchStartX = 0;
+            let touchStartY = 0;
+            
+            document.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            });
+            
+            document.addEventListener('touchend', (e) => {
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                
+                const diffX = touchEndX - touchStartX;
+                const diffY = touchEndY - touchStartY;
+                
+                // Determine swipe direction
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    if (diffX > 0) movePlayer('right');
+                    else movePlayer('left');
+                } else {
+                    if (diffY > 0) movePlayer('down');
+                    else movePlayer('up');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
